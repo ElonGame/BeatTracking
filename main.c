@@ -1,11 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 // #include <complex.h>
 #include <fftw3.h>
 #include <portaudio.h>
 
-#include "beat_track.c"
+// Does not work in ARM arch without compiled library. Not needed either. Only for testing
+#include <sndfile.h>
+
+
 
 #define SAMPLE_RATE  (44100)
 #define FRAMES_PER_BUFFER (512)
@@ -18,21 +22,21 @@
 typedef float SAMPLE;
 #define SAMPLE_SILENCE  (0.0f)
 #define PRINTF_S_FORMAT "%.8f"
-#elif 1
-#define PA_SAMPLE_TYPE  paInt16
-typedef short SAMPLE;
-#define SAMPLE_SILENCE  (0)
-#define PRINTF_S_FORMAT "%d"
-#elif 0
-#define PA_SAMPLE_TYPE  paInt8
-typedef char SAMPLE;
-#define SAMPLE_SILENCE  (0)
-#define PRINTF_S_FORMAT "%d"
-#else
-#define PA_SAMPLE_TYPE  paUInt8
-typedef unsigned char SAMPLE;
-#define SAMPLE_SILENCE  (128)
-#define PRINTF_S_FORMAT "%d"
+// #elif 1
+// #define PA_SAMPLE_TYPE  paInt16
+// typedef short SAMPLE;
+// #define SAMPLE_SILENCE  (0)
+// #define PRINTF_S_FORMAT "%d"
+// #elif 0
+// #define PA_SAMPLE_TYPE  paInt8
+// typedef char SAMPLE;
+// #define SAMPLE_SILENCE  (0)
+// #define PRINTF_S_FORMAT "%d"
+// #else
+// #define PA_SAMPLE_TYPE  paUInt8
+// typedef unsigned char SAMPLE;
+// #define SAMPLE_SILENCE  (128)
+// #define PRINTF_S_FORMAT "%d"
 #endif
 
 typedef struct
@@ -151,11 +155,11 @@ int main(int argc, char** argv)
     int                 totalFrames;
     int                 numSamples;
     int                 numBytes;
-    SAMPLE              max, val;
-    double              average;
     int                 num_seconds;
     char                *out;
-
+    SNDFILE *file;
+	SF_INFO info;
+    sf_count_t count;
     if (argc == 3)
 	{
 		num_seconds = atoi(argv[1]);
@@ -163,10 +167,25 @@ int main(int argc, char** argv)
 	}
   else
 	{
-		return -1;
+		exit(-1);
   	}
+    memset (&info, 0, sizeof(info)) ;
 
-    printf("patest_record.c\n"); fflush(stdout);
+    info.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
+    info.samplerate = SAMPLE_RATE;
+    info.channels = NUM_CHANNELS;
+
+    file = sf_open (out, SFM_WRITE, &info);
+    if (file == NULL)
+    {
+        printf ("\nError : Not able to create file named '%s' : %s/\n", out, sf_strerror (NULL));
+        exit (1);
+    };
+
+    sf_set_string (file, SF_STR_TITLE, "SPCUP Recorded Output");
+
+    sf_set_string (file, SF_STR_SOFTWARE, "spcup") ;
+    sf_set_string (file, SF_STR_COPYRIGHT, "BITS Goa");
 
     data.maxFrameIndex = totalFrames = num_seconds * SAMPLE_RATE;
     data.frameIndex = 0;
@@ -182,7 +201,6 @@ int main(int argc, char** argv)
 
     err = Pa_Initialize();
     if( err != paNoError ) {Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;}
-
     inputParameters.device = Pa_GetDefaultInputDevice();
     if (inputParameters.device == paNoDevice) {
         fprintf(stderr,"Error: No default input device.\n");
@@ -210,6 +228,7 @@ int main(int argc, char** argv)
 
     while( ( err = Pa_IsStreamActive( stream ) ) == 1 )
     {
+        sf_write_float (file, &data.recordedSamples[data.frameIndex], SAMPLE_RATE);
         Pa_Sleep(1000);
     }
     if( err < 0 ) {Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;}
@@ -217,41 +236,8 @@ int main(int argc, char** argv)
     err = Pa_CloseStream( stream );
     if( err != paNoError ) {Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;}
 
-    /* Measure maximum peak amplitude. */
-    max = 0;
-    average = 0.0;
-    for( i=0; i<numSamples; i++ )
-    {
-        val = data.recordedSamples[i];
-        // printf("index = %d value= "PRINTF_S_FORMAT"\n", i, val); fflush(stdout);
-        if( val < 0 ) val = -val; /* ABS */
-        if( val > max )
-        {
-            max = val;
-        }
-        average += val;
-    }
+	sf_close (file);
 
-    average = average / (double)numSamples;
-
-    printf("sample max amplitude = "PRINTF_S_FORMAT"\n", max );
-    printf("sample average = %lf\n", average );
-
-    /* Write recorded data to a file. */
-    {
-        FILE  *fid;
-        fid = fopen(out, "wb");
-        if( fid == NULL )
-        {
-            printf("Could not open file.");
-        }
-        else
-        {
-            fwrite( data.recordedSamples, NUM_CHANNELS * sizeof(SAMPLE), totalFrames, fid );
-            fclose( fid );
-            printf("Wrote data to '%s'\n",out);
-        }
-    }
 
     /* Playback recorded data.  -------------------------------------------- */
     data.frameIndex = 0;

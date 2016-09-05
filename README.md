@@ -2,7 +2,7 @@
 Beat Tracking for IEEE SP Cup 2016
 
 #Instructions
-Install portaudio library along with alsa lib, fftw3 along with double precision
+Install portaudio library along with alsa lib, fftw3/kissfft along with double precision
 
 Use "make" to compile and run and "make clean" to delete executable and output file.
 
