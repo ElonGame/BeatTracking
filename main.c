@@ -162,7 +162,7 @@ int main(int argc, char** argv)
     sf_count_t count;
     if (argc == 3)
 	{
-		num_seconds = atoi(argv[1]);
+		num_seconds = 2*atoi(argv[1]);
 		out = argv[2];
 	}
   else
@@ -228,13 +228,17 @@ int main(int argc, char** argv)
 
     while( ( err = Pa_IsStreamActive( stream ) ) == 1 )
     {
-        sf_write_float (file, &data.recordedSamples[data.frameIndex], SAMPLE_RATE);
         Pa_Sleep(1000);
     }
     if( err < 0 ) {Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;}
 
     err = Pa_CloseStream( stream );
     if( err != paNoError ) {Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;}
+
+    for (i=0; i<num_seconds;i++)
+    {
+        sf_write_float (file, &data.recordedSamples[i*SAMPLE_RATE], SAMPLE_RATE);
+    }
 
 	sf_close (file);
 
@@ -247,7 +251,7 @@ int main(int argc, char** argv)
         fprintf(stderr,"Error: No default output device.\n");
         Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;
     }
-    outputParameters.channelCount = 2;                     /* stereo output */
+    outputParameters.channelCount = NUM_CHANNELS;                     /* stereo output */
     outputParameters.sampleFormat =  PA_SAMPLE_TYPE;
     outputParameters.suggestedLatency = Pa_GetDeviceInfo( outputParameters.device )->defaultLowOutputLatency;
     outputParameters.hostApiSpecificStreamInfo = NULL;
@@ -271,7 +275,10 @@ int main(int argc, char** argv)
 
         printf("Waiting for playback to finish.\n"); fflush(stdout);
 
-        while( ( err = Pa_IsStreamActive( stream ) ) == 1 ) Pa_Sleep(100);
+        while( ( err = Pa_IsStreamActive( stream ) ) == 1 )
+        {
+            Pa_Sleep(100);
+        }
         if( err < 0 ) {Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;}
 
         err = Pa_CloseStream( stream );
