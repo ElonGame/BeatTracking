@@ -9,12 +9,13 @@
 // Does not work in ARM arch without compiled library. Not needed either. Only for testing
 #include <sndfile.h>
 
-
-
 #define SAMPLE_RATE  (44100)
 #define FRAMES_PER_BUFFER (512)
-#define NUM_CHANNELS    (2)
-#define DITHER_FLAG     (0) /**/
+#define NUM_CHANNELS    (1)
+#define DITHER_FLAG     (0)
+
+#define STFT_WINDOW_SIZE 2048
+#define STFT_HOP_SIZE 1024
 
 /* Select sample format. */
 #if 1
@@ -45,6 +46,9 @@ typedef struct
     int          maxFrameIndex;
     SAMPLE      *recordedSamples;
 } paTestData;
+
+#include "algorithms.c"
+
 static int recordCallback( const void *inputBuffer, void *outputBuffer,
                            unsigned long framesPerBuffer,
                            const PaStreamCallbackTimeInfo* timeInfo,
@@ -162,31 +166,29 @@ int main(int argc, char** argv)
     sf_count_t count;
     if (argc == 3)
 	{
-		num_seconds = 2*atoi(argv[1]);
+		num_seconds = NUM_CHANNELS*atoi(argv[1]);
 		out = argv[2];
 	}
   else
 	{
 		exit(-1);
   	}
+    // Open File for output
     memset (&info, 0, sizeof(info)) ;
-
     info.format = SF_FORMAT_WAV | SF_FORMAT_FLOAT;
     info.samplerate = SAMPLE_RATE;
     info.channels = NUM_CHANNELS;
-
     file = sf_open (out, SFM_WRITE, &info);
     if (file == NULL)
     {
         printf ("\nError : Not able to create file named '%s' : %s/\n", out, sf_strerror (NULL));
         exit (1);
     };
-
     sf_set_string (file, SF_STR_TITLE, "SPCUP Recorded Output");
-
     sf_set_string (file, SF_STR_SOFTWARE, "spcup") ;
     sf_set_string (file, SF_STR_COPYRIGHT, "BITS Goa");
 
+    // Initialize for Recording
     data.maxFrameIndex = totalFrames = num_seconds * SAMPLE_RATE;
     data.frameIndex = 0;
     numSamples = totalFrames * NUM_CHANNELS;
@@ -206,7 +208,7 @@ int main(int argc, char** argv)
         fprintf(stderr,"Error: No default input device.\n");
         Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;
     }
-    inputParameters.channelCount = 2;
+    inputParameters.channelCount = NUM_CHANNELS;
     inputParameters.sampleFormat = PA_SAMPLE_TYPE;
     inputParameters.suggestedLatency = Pa_GetDeviceInfo( inputParameters.device )->defaultLowInputLatency;
     inputParameters.hostApiSpecificStreamInfo = NULL;
@@ -235,13 +237,31 @@ int main(int argc, char** argv)
     err = Pa_CloseStream( stream );
     if( err != paNoError ) {Pa_Terminate(); if( data.recordedSamples ) free( data.recordedSamples ); return -1;}
 
+    // Write Recorded Audio to output file
     for (i=0; i<num_seconds;i++)
     {
         sf_write_float (file, &data.recordedSamples[i*SAMPLE_RATE], SAMPLE_RATE);
     }
-
 	sf_close (file);
 
+    // Begin Algorithms
+    float* stft_result_final  = (float*) malloc(sizeof(float) * (data.maxFrameIndex/STFT_HOP_SIZE) * (STFT_WINDOW_SIZE/2 + 1));
+    STFT(stft_result_final, data.recordedSamples, data.maxFrameIndex, STFT_WINDOW_SIZE, STFT_HOP_SIZE);
+    // for (int i = 0; i<(STFT_WINDOW_SIZE/2 + 1); i++)
+    // {
+    //     for(int j = 0; j<(data.maxFrameIndex/STFT_HOP_SIZE); j++)
+    //     {
+    //         printf("%f ",stft_result_final[i*(data.maxFrameIndex/STFT_HOP_SIZE)+j]);
+    //     }
+    //     printf("\n");
+    // }
+    // TODO:
+    // Compute Novelty curve from spectogram (stft_result_final). Discrete Derivative (positive difference only) row wise
+    // and accumulate column wise.
+    // Subract local average curve from Novelty curve and also normalize it.
+    // Novelty curve to Tempogram.Optimized local periodicity kernels using fourier analysis. Accumulate all maximising kernels in time.
+    // Apply halfwave rectification to obtain PLP (Predominant Local Pulse Curve)
+    // Restrict Tempogram to a range of BPM to obtain better PLP curve.
 
     /* Playback recorded data.  -------------------------------------------- */
     data.frameIndex = 0;
@@ -296,5 +316,6 @@ int main(int argc, char** argv)
         fprintf( stderr, "Error message: %s\n", Pa_GetErrorText( err ) );
         err = 1;          /* Always return 0 or 1, but no other return codes. */
     }
+    fftw_free(stft_result_final);
     return err;
 }
