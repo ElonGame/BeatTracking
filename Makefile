@@ -5,7 +5,10 @@ CFLAGS = -lportaudio -lsndfile -lm -lfftw3
 
 spcup: algorithms.c
 	$(CC) -g main.c -o spcup.out $(CFLAGS)
-	./spcup.out 20 "output.wav"
+	./spcup.out 0 20 "2.flac" "output.wav"
+
+convert:
+	ffmpeg -i "1.flac" -ac 1 "2.flac"
 
 clean:
 	rm -rf *.out
