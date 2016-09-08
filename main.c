@@ -284,10 +284,13 @@ int main(int argc, char** argv)
     //     printf("\n");
     // }
     // TODO:
+    // Visualize Spectogram. The function should be such that it can handle a Tempogram, Novelty curve and PLP curve too.
     // Compute Novelty curve from spectogram (stft_result_final). Discrete Derivative (positive difference only) row wise
     // and accumulate column wise.
+    // From Novelty curve annotate music with Beat info using taps at note onsets and make the function in such a way that it can handle PLP and resricted PLP curve.
     // Subract local average curve from Novelty curve and also normalize it.
-    // Novelty curve to Tempogram.Optimized local periodicity kernels using fourier analysis. Accumulate all maximising kernels in time.
+    // Novelty curve to Tempogram (Ensure Tempogram can be beat restricted) by obtaining Optimized local periodicity kernels using fourier analysis.
+    // Accumulate all maximising kernels in time.
     // Apply halfwave rectification to obtain PLP (Predominant Local Pulse Curve)
     // Restrict Tempogram to a range of BPM to obtain better PLP curve.
 

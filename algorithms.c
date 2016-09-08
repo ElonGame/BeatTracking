@@ -8,32 +8,25 @@ void hamming_window(int windowLength, float *buffer)
     }
 }
 
-void STFT(float *stft_result_final, float *signal, int signalLength, int windowSize, int hopSize) {
-
-
+void STFT(float *stft_result_final, float *signal, int signalLength, int windowSize, int hopSize)
+{
     fftw_complex    *data, *fft_result, *ifft_result;
     fftw_plan       plan_forward, plan_backward;
     int             i;
-
     data        = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * windowSize );
     fft_result  = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * windowSize );
     ifft_result = ( fftw_complex* ) fftw_malloc( sizeof( fftw_complex ) * windowSize );
-
     plan_forward  = fftw_plan_dft_1d( windowSize, data, fft_result, FFTW_FORWARD, FFTW_ESTIMATE );
-
     // Create a hamming window of appropriate length
     float window[windowSize];
     hamming_window(windowSize, window);
-
     int chunkPosition = 0;
-
     int readIndex;
-
-    // Should we stop reading in chunks?
     int bStop = 0;
-
     int numChunks = 0;
+    
     // printf("%d\n",signalLength);
+
     // Process each chunk of the signal
     while(numChunks < (signalLength/hopSize) && !bStop)
     {
@@ -68,9 +61,6 @@ void STFT(float *stft_result_final, float *signal, int signalLength, int windowS
 
 
         // Copy the first (windowSize/2 + 1) data points into your spectrogram.
-        // We do this because the FFT output is mirrored about the nyquist
-        // frequency, so the second half of the data is redundant. This is how
-        // Matlab's spectrogram routine works.
 
 
         for (i = 0; i < (windowSize/2 + 1); i++)
@@ -83,7 +73,7 @@ void STFT(float *stft_result_final, float *signal, int signalLength, int windowS
 
         chunkPosition += hopSize;
         numChunks++;
-    }; // Excuse the formatting, the while ends here.
+    };
 
     fftw_destroy_plan(plan_forward);
 
