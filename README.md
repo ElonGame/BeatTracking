@@ -2,10 +2,12 @@
 Beat Tracking for IEEE SP Cup 2016
 
 #Instructions
-Install portaudio library along with alsa lib, fftw3/kissfft along with double precision and libsndfile
+Install portaudio library along with alsa lib, fftw3/kissfft along with double precision and libsndfile and libghc-cairo
 
 ##Ubuntu packages (install using apt-get install)
-- libportaudio2 libportaudio2 portaudio19-dev libsndfile1 libsndfile1-dev libfftw3-bin libfftw3-dev
+- libportaudio2 libportaudio2 portaudio19-dev libsndfile1 libsndfile1-dev libfftw3-bin libfftw3-dev libghc-cairo-dev
+
+- ffmpeg to convert audio to required format. (mono, uncompressed wav or flac)
 
 Use "make" to compile and run and "make clean" to delete executable and output file.
 

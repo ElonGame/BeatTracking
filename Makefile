@@ -1,10 +1,13 @@
 CC = gcc
-CFLAGS = -lportaudio -lsndfile -lm -lfftw3
+CFLAGS = -I/usr/include/cairo/ -L/usr/local/lib -lportaudio -lsndfile -lm -lfftw3f -lcairo
 
-# Install portaudio library, fftw3 along with double precision and libsndfile
+# Install portaudio library, fftw3 along with double precision and libsndfile and ffmpeg for conversion to required audio type and libcairo for spectogram image generation.
 
-spcup: algorithms.c
-	$(CC) -g main.c -o spcup.out $(CFLAGS)
+%.o:%.c %.h
+	$(CC)  -c -o $@ $< $(CFLAGS)
+
+spcup: main.o spectogram.o spectrum.o window.o algorithms.h callbacks.h common.h spectrum.h spectogram.h window.h
+	$(CC) window.o spectrum.o spectogram.o main.o -o spcup.out $(CFLAGS)
 	./spcup.out 0 20 "2.flac" "output.wav"
 
 convert:
@@ -12,4 +15,5 @@ convert:
 
 clean:
 	rm -rf *.out
+	rm -rf *.o
 	rm -rf *.raw
