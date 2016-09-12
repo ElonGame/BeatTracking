@@ -140,9 +140,9 @@ static void init_test (void)
 	assert (factorial (8) == 40320.0);
 
 	assert (fabs (besseli0 (0.0) - 1.0) < 1e-8);
-	assert (fabs (besseli0 (0.5) - 1.06348337074132) < 1e-8);
-	assert (fabs (besseli0 (1.0) - 1.26606587775201) < 1e-14);
-	assert (fabs (besseli0 (2.0) - 2.27958530233607) < 1e-14);
-	assert (fabs (besseli0 (3.5) - 7.37820343222548) < 1e-14);
+	assert (fabs (besseli0 (0.5) - 1.06348337074132) < 1e-5);
+	assert (fabs (besseli0 (1.0) - 1.26606587775201) < 1e-5);
+	assert (fabs (besseli0 (2.0) - 2.27958530233607) < 1e-5);
+	assert (fabs (besseli0 (3.5) - 7.37820343222548) < 1e-5);
 
 } /* init_test */

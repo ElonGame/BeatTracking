@@ -1,2 +1,3 @@
 #pragma once
-#include "spectogram.h"
+#include "spectrum.h"
+#include "novelty_curve.h"

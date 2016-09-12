@@ -2,14 +2,17 @@
 Beat Tracking for IEEE SP Cup 2016
 
 #Instructions
-Install portaudio library along with alsa lib, fftw3/kissfft along with double precision and libsndfile and libghc-cairo
+Install portaudio library along with alsa lib, fftw3/kissfft along with double and single precision and libsndfile
 
 ##Ubuntu packages (install using apt-get install)
-- libportaudio2 libportaudio2 portaudio19-dev libsndfile1 libsndfile1-dev libfftw3-bin libfftw3-dev libghc-cairo-dev
+- libportaudio2 libportaudio2 portaudio19-dev libsndfile1 libsndfile1-dev libfftw3-bin libfftw3-dev
 
 - ffmpeg to convert audio to required format. (mono, uncompressed wav or flac)
 
+- python3 along with python3-numpy and python3-numpy for visualisation
+
 Use "make" to compile and run and "make clean" to delete executable and output file.
+Run the python scripts with python3 <script-name> to visualise variouys graphs and grams.
 
 #Current Status:
 - Records audio in CD quality from available microphone and plays it back.

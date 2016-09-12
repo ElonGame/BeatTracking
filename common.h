@@ -5,6 +5,7 @@
 #include <math.h>
 #include <limits.h>
 #include <string.h>
+#include <float.h>
 // #include <complex.h>
 #include <fftw3.h>
 #include <portaudio.h>
@@ -35,6 +36,8 @@
 #define FRAMES_PER_BUFFER (512)
 #define NUM_CHANNELS    (1)
 #define DITHER_FLAG     (0)
+#define SPECTROGRAM_PARAMETER 2048
+#define TEMPOGRAM_PARAMETER 64
 
 /* Select sample format. */
 #define PA_SAMPLE_TYPE  paFloat32

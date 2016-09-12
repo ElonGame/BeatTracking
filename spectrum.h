@@ -1,21 +1,29 @@
 #pragma once
 #include "common.h"
+#include "window.h"
 typedef struct
-{	int speclen ;
-	enum WINDOW_FUNCTION wfunc ;
-	fftwf_plan plan ;
+{
+	int speclen;
+	int hop_size;
+	enum WINDOW_FUNCTION wfunc;
+	fftw_plan plan;
 
-	SAMPLE *time_domain ;
-	SAMPLE *window ;
-	SAMPLE *freq_domain ;
-	SAMPLE *mag_spec ;
+	fftw_complex *time_domain;
+	SAMPLE *window;
+	fftw_complex *freq_domain;
+	SAMPLE *mag_spec;
 
-	SAMPLE data [] ;
-} spectrum ;
+	SAMPLE *data;
+	int max_frame;
+	float min_freq;
+	float max_freq;
+} spectrum;
 
 
-extern spectrum * create_spectrum (int speclen, enum WINDOW_FUNCTION window_function) ;
+extern int calc_spec_len(SAMPLE fft_freq);
 
-extern void destroy_spectrum (spectrum * spec) ;
+extern spectrum * create_spectrum (SAMPLE * data, int max_frame, int speclen, int hop_size, enum WINDOW_FUNCTION window_function, float min_freq, float max_freq);
 
-extern SAMPLE calc_magnitude_spectrum (spectrum * spec) ;
+extern void destroy_spectrum (spectrum * spec);
+
+extern SAMPLE calc_magnitude_spectrum (spectrum * spec, int type);
