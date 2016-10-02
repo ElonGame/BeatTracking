@@ -8,8 +8,7 @@ print (xdim)
 a = np.zeros((xdim),dtype=float)
 j = 0
 line = file.readline().split(' ')
-while(j < xdim):
-    # print (line[j])
+while(j < xdim - 157):
     print (j)
     a[j] = float(line[j])
     j += 1

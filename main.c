@@ -161,7 +161,7 @@ int main(int argc, char** argv)
     float min_freq_tempo = 20.0, max_freq_tempo = 20000.0;
     spectrum *spec_tempo = create_spectrum(novelty_curve,(data.maxFrameIndex/(hop_size*2)), speclen_tempo,hop_size_tempo,KAISER, min_freq_tempo, max_freq_tempo);
     printf("%d\n",speclen_tempo);
-    SAMPLE max_mag_tempo= calc_magnitude_spectrum (spec_tempo,1);
+    SAMPLE max_mag_tempo= calc_magnitude_spectrum (spec_tempo,0);
     printf("%f\n",max_mag_tempo);
 
     // tempogram Visualisation
