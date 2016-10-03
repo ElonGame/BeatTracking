@@ -143,8 +143,9 @@ int main(int argc, char** argv)
     }
     // Audio to Spectogram end
     // Spectrogram to Novelty Curve Begin
-    SAMPLE *novelty_curve = (SAMPLE * ) malloc( sizeof( SAMPLE ) * (data.maxFrameIndex/(hop_size*2)));
-    calculate_novelty_curve(spec->mag_spec, speclen, data.maxFrameIndex, hop_size, novelty_curve);
+    int sizeOfNoveltyCurve = data.maxFrameIndex/(hop_size*2);
+    SAMPLE *novelty_curve = (SAMPLE * ) malloc( sizeof( SAMPLE ) * (sizeOfNoveltyCurve));
+    calculate_novelty_curve(spec->mag_spec, speclen, data.maxFrameIndex, hop_size, novelty_curve, sizeOfNoveltyCurve);
     // Visualize novelty curve
     FILE * novelty = fopen("novelty.txt", "w+");
     fprintf(novelty, "%d\n",data.maxFrameIndex/(hop_size*2));
@@ -154,7 +155,9 @@ int main(int argc, char** argv)
     }
     fprintf(novelty,"\n");
     // Spectrogram to Novelty Curve End
-    // Novelty Curve to Tempogram Begin
+
+
+      // Novelty Curve to Tempogram Begin
     float fft_freq_tempo = SAMPLE_RATE/TEMPOGRAM_PARAMETER;
     int speclen_tempo = calc_spec_len(fft_freq_tempo);
     int hop_size_tempo = speclen_tempo/2;

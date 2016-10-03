@@ -6,8 +6,8 @@ CFLAGS =  -lportaudio -lsndfile -lm -lfftw3 -g
 %.o:%.c %.h
 	$(CC)  -c -o $@ $< $(CFLAGS)
 
-spcup: main.o spectrum.o window.o novelty_curve.o algorithms.h callbacks.h common.h spectrum.h window.h novelty_curve.h
-	$(CC) window.o spectrum.o novelty_curve.o main.o -o spcup.out $(CFLAGS)
+spcup: main.o spectrum.o window.o moving_average.o novelty_curve.o restrict_bpm.o find_mode.o algorithms.h callbacks.h common.h spectrum.h window.h novelty_curve.h moving_average.h restrict_bpm.h find_mode.h
+	$(CC) window.o spectrum.o moving_average.o novelty_curve.o main.o -o spcup.out $(CFLAGS)
 	./spcup.out 0 180 "2.flac" "output.wav"
 
 convert:
