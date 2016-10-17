@@ -17,3 +17,4 @@ clean:
 	rm -rf *.out
 	rm -rf *.o
 	rm -rf *.raw
+	rm -rf *.txt

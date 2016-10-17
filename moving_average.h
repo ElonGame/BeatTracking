@@ -2,4 +2,4 @@
 #include "common.h"
 #include "find_mode.h"
 
-extern SAMPLE* movingAverageOfNoveltyCurve(SAMPLE noveltyCurve[], long sizeOfArray, int sizeOfMovingAv);
+extern void movingAverageOfNoveltyCurve(SAMPLE *noveltyCurve,SAMPLE *movingAverageArray, long sizeOfArray, int sizeOfMovingAv);

@@ -40,11 +40,11 @@ int calc_spec_len(SAMPLE fft_freq)
 	** The FFT window size is twice this.
 	*/
 	if (fft_freq != 0.0)
-		/* Choose an FFT window size of 1/fft_freq seconds of audio */
-		speclen = (SAMPLE_RATE / fft_freq) ;
+	/* Choose an FFT window size of 1/fft_freq seconds of audio */
+	speclen = (SAMPLE_RATE / fft_freq) ;
 	else
-		/* Long enough to represent frequencies down to 20Hz. */
-		speclen =  (SAMPLE_RATE / 20);
+	/* Long enough to represent frequencies down to 20Hz. */
+	speclen =  (SAMPLE_RATE / 20);
 
 	/* Find the nearest fast value for the FFT size. */
 	int d;	/* difference */
@@ -112,21 +112,21 @@ spectrum * create_spectrum (SAMPLE * data, int max_frame, int speclen, int hop_s
 	switch (spec->wfunc)
 	{
 		case RECTANGULAR :
-			break;
+		break;
 		case KAISER :
-			calc_kaiser_window (spec->window, speclen, 20.0);
-			break;
+		calc_kaiser_window (spec->window, speclen, 20.0);
+		break;
 		case NUTTALL:
-			calc_nuttall_window (spec->window, speclen);
-			break;
+		calc_nuttall_window (spec->window, speclen);
+		break;
 		case HANN :
-			calc_hann_window (spec->window,  speclen);
-			break;
+		calc_hann_window (spec->window,  speclen);
+		break;
 		default :
-			printf ("Internal error: Unknown window_function.\n");
-			free (spec);
-			exit (1);
-		};
+		printf ("Internal error: Unknown window_function.\n");
+		free (spec);
+		exit (1);
+	};
 
 
 
@@ -150,32 +150,32 @@ SAMPLE calc_magnitude_spectrum (spectrum * spec, int type)
 	int k;
 
 	int chunk_position = 0;
-    int read_index;
-    int b_stop = 0;
-    int num_chunks = 0;
+	int read_index;
+	int b_stop = 0;
+	int num_chunks = 0;
 	while(num_chunks < (spec->max_frame/spec->hop_size) && !b_stop)
 	{
 		for (k = 0; k < spec->speclen; k++)
 		{
 			read_index = chunk_position + k;
 			if (read_index < spec->max_frame)
-	        {
+			{
 				spec->time_domain [k][0] = spec->data[read_index];
 				spec->time_domain [k][1] = 0.0;
-	        } else
-	        {
-	            // we have read beyond the signal, so zero-pad it!
+			} else
+			{
+				// we have read beyond the signal, so zero-pad it!
 				spec->time_domain [k][0] = 0;
 				spec->time_domain [k][1] = 0.0;
-	            b_stop = 1;
-	        }
+				b_stop = 1;
+			}
 		}
 
 		if (spec->wfunc != RECTANGULAR)
-			for (k = 0; k < spec->speclen; k++)
-			{
-				spec->time_domain [k][0] *= spec->window [k];
-			}
+		for (k = 0; k < spec->speclen; k++)
+		{
+			spec->time_domain [k][0] *= spec->window [k];
+		}
 
 		fftw_execute (spec->plan);
 
@@ -190,21 +190,21 @@ SAMPLE calc_magnitude_spectrum (spectrum * spec, int type)
 			SAMPLE value;
 			switch (type) {
 				case 0:
-					value = sqrt (re * re + im * im);
-					break;
+				value = sqrt (re * re + im * im);
+				break;
 				case 1:
-					value = 0.21714724095 * log (re * re + im * im);
-					break;
+				value = 0.21714724095 * log (re * re + im * im);
+				break;
 				case 2:
-					value = 4.34294481903 * log(re * re + im * im);
-					break;
+				value = 4.34294481903 * log(re * re + im * im);
+				break;
 			}
 			spec->mag_spec [k*(spec->max_frame/spec->hop_size) + num_chunks] = value;
 			max = MAX (max, spec->mag_spec [k]);
 		};
 
 		chunk_position += spec->hop_size;
-	    num_chunks++;
+		num_chunks++;
 	};
 	return max;
 } /* calc_magnitude_spectrum */
